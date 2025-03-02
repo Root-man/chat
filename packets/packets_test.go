@@ -27,7 +27,7 @@ func TestPresence_Encode(t *testing.T) {
 	}
 }
 
-func TestPresence_Decode(t *testing.T) {
+func TestPresence_Receive(t *testing.T) {
 	data := []byte{
 		0, 0, 0, 8, // Length of the username (8 bytes)
 		't', 'e', 's', 't', 'u', 's', 'e', 'r', // Username
@@ -36,8 +36,8 @@ func TestPresence_Decode(t *testing.T) {
 
 	r := bytes.NewReader(data)
 	var p Presence
-	if err := p.Decode(r); err != nil {
-		t.Fatalf("Decode() error = %v", err)
+	if err := p.Receive(r); err != nil {
+		t.Fatalf("Receive() error = %v", err)
 	}
 
 	expected := Presence{
@@ -46,7 +46,7 @@ func TestPresence_Decode(t *testing.T) {
 	}
 
 	if p != expected {
-		t.Errorf("Decode() = %v, want %v", p, expected)
+		t.Errorf("Receive() = %v, want %v", p, expected)
 	}
 }
 
@@ -67,7 +67,7 @@ func TestHandshake_Encode(t *testing.T) {
 	}
 }
 
-func TestHandshake_Decode(t *testing.T) {
+func TestHandshake_Receive(t *testing.T) {
 	data := []byte{
 		0, 0, 0, 8, // Length of the username (8 bytes)
 		't', 'e', 's', 't', 'u', 's', 'e', 'r', // Username
@@ -75,8 +75,8 @@ func TestHandshake_Decode(t *testing.T) {
 
 	r := bytes.NewReader(data)
 	var h Handshake
-	if err := h.Decode(r); err != nil {
-		t.Fatalf("Decode() error = %v", err)
+	if err := h.Receive(r); err != nil {
+		t.Fatalf("Receive() error = %v", err)
 	}
 
 	expected := Handshake{
@@ -84,7 +84,7 @@ func TestHandshake_Decode(t *testing.T) {
 	}
 
 	if h != expected {
-		t.Errorf("Decode() = %v, want %v", h, expected)
+		t.Errorf("Receive() = %v, want %v", h, expected)
 	}
 }
 
@@ -108,7 +108,7 @@ func TestHandshakeResponse_Encode(t *testing.T) {
 	}
 }
 
-func TestHandshakeResponse_Decode(t *testing.T) {
+func TestHandshakeResponse_Receive(t *testing.T) {
 	data := []byte{
 		0, 0, 0, 2, // Number of online users (2)
 		0, 0, 0, 5, // Length of the first username (5 bytes)
@@ -119,8 +119,8 @@ func TestHandshakeResponse_Decode(t *testing.T) {
 
 	r := bytes.NewReader(data)
 	var hr HandshakeResponse
-	if err := hr.Decode(r); err != nil {
-		t.Fatalf("Decode() error = %v", err)
+	if err := hr.Receive(r); err != nil {
+		t.Fatalf("Receive() error = %v", err)
 	}
 
 	expected := HandshakeResponse{
@@ -154,7 +154,7 @@ func TestMessage_Encode(t *testing.T) {
 	}
 }
 
-func TestMessage_Decode(t *testing.T) {
+func TestMessage_Receive(t *testing.T) {
 	data := []byte{
 		0, 0, 0, 8, // Length of the username (8 bytes)
 		't', 'e', 's', 't', 'u', 's', 'e', 'r', // Username
@@ -165,8 +165,8 @@ func TestMessage_Decode(t *testing.T) {
 
 	r := bytes.NewReader(data)
 	var m Message
-	if err := m.Decode(r); err != nil {
-		t.Fatalf("Decode() error = %v", err)
+	if err := m.Receive(r); err != nil {
+		t.Fatalf("Receive() error = %v", err)
 	}
 
 	expected := Message{
@@ -176,6 +176,6 @@ func TestMessage_Decode(t *testing.T) {
 	}
 
 	if m != expected {
-		t.Errorf("Decode() = %v, want %v", m, expected)
+		t.Errorf("Receive() = %v, want %v", m, expected)
 	}
 }

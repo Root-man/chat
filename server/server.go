@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -48,22 +49,26 @@ func (s *Server) Run() error {
 			continue
 		}
 
-		msg := &packets.Message{From: "CHAT", Payload: fmt.Sprintf("User %s has joined the chat!", *username), Timestamp: time.Now()}
+		if len(s.conns) > 1 {
+			msg := &packets.Message{From: "CHAT", Payload: fmt.Sprintf("User %s has joined the chat!", *username), Timestamp: time.Now()}
+			// presence := &packets.Presence{Username: *username, Status: true}
 
-		to := make([]string, len(s.conns))
+			var to []string
 
-		for u := range maps.Keys(s.conns) {
-			to = append(to, u)
+			for u := range maps.Keys(s.conns) {
+				to = append(to, u)
+			}
+
+			go s.multicast(msg, to)
+			// go s.multicast(presence, to)
 		}
-
-		go s.broadcast(msg, to)
 		go s.handleConnection(*username)
 	}
 }
 
 func (s *Server) handshake(conn net.Conn) (*string, error) {
 	handshake := &packets.Handshake{}
-	if err := handshake.Decode(conn); err != nil {
+	if err := handshake.Receive(conn); err != nil {
 		return nil, err
 	}
 
@@ -98,7 +103,7 @@ func (s *Server) handleConnection(username string) {
 	msg := &packets.Message{}
 
 	for {
-		err := msg.Decode(conn)
+		err := msg.Receive(conn)
 		if err != nil && err != io.EOF {
 			log.Printf("Failed to deserialize message from %s: %s", username, err)
 			continue
@@ -108,7 +113,10 @@ func (s *Server) handleConnection(username string) {
 			return
 		}
 
-		to := make([]string, len(s.conns)-1)
+		if len(s.conns) == 1 {
+			continue
+		}
+		var to []string
 
 		for u := range maps.Keys(s.conns) {
 			if u != username {
@@ -116,7 +124,9 @@ func (s *Server) handleConnection(username string) {
 			}
 		}
 
-		s.broadcast(msg, to)
+		log.Printf("To: %v", to)
+
+		s.multicast(msg, to)
 	}
 }
 
@@ -125,27 +135,44 @@ func (s *Server) removeConnection(username string) {
 	defer s.mu.Unlock()
 
 	msg := &packets.Message{From: "CHAT", Payload: fmt.Sprintf("User %s has left the chat.", username), Timestamp: time.Now()}
+	// presence := &packets.Presence{Username: username, Status: true}
 
 	delete(s.conns, username)
-	to := make([]string, len(s.conns))
+	var to []string
 
 	for u := range maps.Keys(s.conns) {
 		to = append(to, u)
 	}
 
-	go s.broadcast(msg, to)
+	go s.multicast(msg, to)
+	// go s.multicast(presence, to)
 }
 
-func (s *Server) broadcast(p packets.Packet, to []string) error {
+func (s *Server) multicast(p packets.Packet, to []string) error {
 	for _, username := range to {
-		conn := s.conns[username]
-		_, err := conn.Write(p.Encode())
-		if err != nil {
-			return fmt.Errorf("failed to broadcast the message to %s: %s", username, err)
+		if err := s.send(p, username); err != nil {
+			return errors.Join(errors.New("failed to multicast packet"), err)
 		}
-
-		log.Printf("Broadcasted %s to %s", p, username)
 	}
+
+	return nil
+}
+
+func (s *Server) send(p packets.Packet, to string) error {
+	log.Printf("Sending %s to %s", p, to)
+	conn, ok := s.conns[to]
+	if !ok {
+		return fmt.Errorf("no connection found for %s", to)
+	}
+
+	log.Printf("Sending %s to %s", p, to)
+
+	_, err := conn.Write(p.Encode())
+	if err != nil {
+		return errors.Join(fmt.Errorf("failed to send packet %s to %s", p, to), err)
+	}
+
+	log.Printf("Packet %s was sent to %s", p, to)
 
 	return nil
 }

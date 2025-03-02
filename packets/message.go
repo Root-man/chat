@@ -33,7 +33,7 @@ func (m *Message) Encode() []byte {
 	return packet
 }
 
-func (m *Message) Decode(r io.Reader) error {
+func (m *Message) Receive(r io.Reader) error {
 	// Read the first 4 bytes to get the length of the username
 	lengthBytes := make([]byte, 4)
 	if _, err := io.ReadFull(r, lengthBytes); err != nil {

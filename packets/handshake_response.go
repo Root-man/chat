@@ -31,7 +31,7 @@ func (hr *HandshakeResponse) Encode() []byte {
 	return packet
 }
 
-func (hr *HandshakeResponse) Decode(r io.Reader) error {
+func (hr *HandshakeResponse) Receive(r io.Reader) error {
 	// Read the first 4 bytes to get the number of online users
 	numUsersBytes := make([]byte, 4)
 	if _, err := io.ReadFull(r, numUsersBytes); err != nil {

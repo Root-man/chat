@@ -55,7 +55,15 @@ func renderChatView(app *tview.Application, c *Client, msgChan <-chan packets.Me
 		AddItem(headerText, 0, 1, false).
 		AddItem(button, 20, 1, false)
 
+	usersList := tview.NewTextView().SetTextAlign(tview.AlignLeft).SetDynamicColors(true)
 	chatBox := tview.NewTextView().SetTextAlign(tview.AlignLeft).SetDynamicColors(true)
+
+	usersList.SetLabel("User list")
+	usersList.Write([]byte("\n======="))
+
+	for _, u := range c.usersOnline {
+		usersList.Write([]byte(u + "\n"))
+	}
 
 	inputField := tview.NewInputField()
 	inputField.SetLabel("Message: ").SetFieldWidth(0).SetDoneFunc(func(key tcell.Key) {
@@ -75,7 +83,8 @@ func renderChatView(app *tview.Application, c *Client, msgChan <-chan packets.Me
 		SetColumns(30, 0, 30).
 		SetBorders(true).
 		AddItem(header, 0, 0, 1, 3, 0, 0, false).
-		AddItem(chatBox, 1, 0, 1, 3, 0, 0, false).
+		AddItem(usersList, 1, 0, 1, 1, 0, 0, false).
+		AddItem(chatBox, 1, 1, 1, 2, 0, 0, false).
 		AddItem(inputField, 2, 0, 1, 3, 0, 0, false)
 
 	app.SetRoot(grid, true).SetFocus(inputField).Sync()

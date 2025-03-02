@@ -22,7 +22,7 @@ func (h *Handshake) Encode() []byte {
 	return packet
 }
 
-func (h *Handshake) Decode(r io.Reader) error {
+func (h *Handshake) Receive(r io.Reader) error {
 	// Read the first 4 bytes to get the length of the username
 	lengthBytes := make([]byte, 4)
 	if _, err := io.ReadFull(r, lengthBytes); err != nil {

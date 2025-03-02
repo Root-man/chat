@@ -61,7 +61,7 @@ func (c *Client) handshake() error {
 
 	resp := &packets.HandshakeResponse{}
 
-	if err = resp.Decode(c.conn); err != nil {
+	if err = resp.Receive(c.conn); err != nil {
 		return fmt.Errorf("handshake failed: %s", err)
 	}
 
@@ -76,7 +76,7 @@ func (c *Client) listen(msgChan chan<- packets.Message) {
 	msg := &packets.Message{}
 
 	for {
-		if err := msg.Decode(c.conn); err != nil {
+		if err := msg.Receive(c.conn); err != nil {
 			fmt.Printf("Failed to deserialize message: %s", err)
 			continue
 		}

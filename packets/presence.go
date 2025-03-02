@@ -27,7 +27,7 @@ func (p *Presence) Encode() []byte {
 	return packet
 }
 
-func (p *Presence) Decode(r io.Reader) error {
+func (p *Presence) Receive(r io.Reader) error {
 	// Read the first 4 bytes to get the length of the username
 	lengthBytes := make([]byte, 4)
 	if _, err := io.ReadFull(r, lengthBytes); err != nil {

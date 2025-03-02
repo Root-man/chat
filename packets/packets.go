@@ -6,6 +6,6 @@ import (
 
 type Packet interface {
 	Encode() []byte
-	Decode(io.Reader) error
+	Receive(io.Reader) error
 	String() string
 }
