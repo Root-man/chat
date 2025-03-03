@@ -7,6 +7,7 @@ require (
 	github.com/rivo/tview v0.0.0-20241227133733-17b7edb88c57
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
+	google.golang.org/protobuf v1.36.5
 )
 
 require (

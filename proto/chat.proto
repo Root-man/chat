@@ -1,0 +1,32 @@
+syntax = "proto3";
+package packets;
+
+option go_package = "github.com/root-man/chat/chat/proto";
+
+message Envelope {
+    oneof payload {
+        Message message = 1;
+        Handshake handshake = 2;
+        HandshakeResponse handshake_response = 3;
+        Presence presence = 4;
+    }
+}
+
+message Message {
+    string from = 1;
+    string payload = 2;
+    uint64 unix_ts_sec = 3;
+}
+
+message Handshake {
+    string username = 1;
+}
+
+message HandshakeResponse {
+    repeated string users_online = 1;
+}
+
+message Presence {
+    string username = 1;
+    bool status = 2;
+}
